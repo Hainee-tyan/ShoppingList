@@ -7,5 +7,5 @@
 ---
 
 **Использованные сторонние библиотеки:**
-[ButterKnife](http://jakewharton.github.io/butterknife/)
-[Realm](https://realm.io)
+* [ButterKnife](http://jakewharton.github.io/butterknife/)
+* [Realm](https://realm.io)
