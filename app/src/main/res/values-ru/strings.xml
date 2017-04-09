@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Список покупок</string>
+    <string name="currency">₽</string>
+    <string name="default_list_name">Список покупок</string>
+    <string name="default_list_name_hint"><i>Список покупок</i></string>
+
+    <string name="empty_list">Здесь пока ничего нет</string>
+</resources>

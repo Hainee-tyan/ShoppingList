@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.activity.MainActivity"
+    android:background="@color/listBackground">
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@drawable/horizontal_divider"/>
+    <TextView
+        android:id="@+id/empty_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/activity_margin"
+        android:text="@string/empty_list"
+        android:gravity="center"
+        android:textSize="@dimen/empty_list_text_size"
+        android:textColorLink="?attr/colorPrimary"
+        android:visibility="gone"/>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/fab_button_margin_bottom"
+        android:layout_marginRight="@dimen/fab_button_margin_right"
+        android:layout_marginEnd="@dimen/fab_button_margin_right"
+        app:elevation="@dimen/fab_button_elevation"
+        app:srcCompat="@drawable/ic_add_white_24dp"
+        app:pressedTranslationZ="@dimen/fab_button_translation_z"
+        app:borderWidth="0dp"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="normal" />
+</RelativeLayout>

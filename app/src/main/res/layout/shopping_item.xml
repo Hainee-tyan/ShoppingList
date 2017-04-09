@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shopping_item"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="@integer/item_list_name_weight">
+        <CheckBox
+            android:id="@+id/item_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
+        <tyan.hainee.shoppinglist.ui.widget.MultilineEditText
+            android:id="@+id/item_name"
+            android:inputType="textMultiLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:background="@android:color/transparent"
+            android:paddingTop="@dimen/item_name_vertical_padding"
+            android:paddingBottom="@dimen/item_name_vertical_padding"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+    <View
+        android:layout_width="@dimen/vertical_divider_width"
+        android:layout_height="match_parent"
+        android:background="@color/verticalDividerColor"
+        android:layout_marginEnd="@dimen/divider_horizontal_margin"
+        android:layout_marginLeft="@dimen/divider_horizontal_margin"
+        android:layout_marginRight="@dimen/divider_horizontal_margin"
+        android:layout_marginStart="@dimen/divider_horizontal_margin" />
+    <EditText
+        android:id="@+id/item_price"
+        android:hint="@string/price_hint"
+        android:inputType="numberDecimal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:imeOptions="actionNext"
+        android:background="@android:color/transparent"
+        android:layout_weight="@integer/item_list_price_weight"
+        android:maxLength="@integer/price_max_length"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.activity.ShoppingListActivity"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:paddingLeft="@dimen/item_list_horizontal_padding"
+    android:paddingRight="@dimen/item_list_horizontal_padding"
+    android:orientation="vertical"
+    android:background="@color/listBackground"
+    android:focusableInTouchMode="true">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/shopping_list_name"
+            android:hint="@string/default_list_name_hint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="@integer/item_list_name_weight"
+            android:inputType="textCapSentences|textMultiLine|textFilter"
+            android:background="@android:color/transparent"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/list_big_text_size"
+            android:maxLength="50"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textColor="@color/horizontalDividerColor"/>
+        <View
+            android:layout_width="@dimen/vertical_divider_width"
+            android:layout_height="match_parent"
+            android:background="@color/verticalDividerColor"
+            android:layout_marginEnd="@dimen/divider_horizontal_margin"
+            android:layout_marginLeft="@dimen/divider_horizontal_margin"
+            android:layout_marginRight="@dimen/divider_horizontal_margin"
+            android:layout_marginStart="@dimen/divider_horizontal_margin" />
+        <TextView
+            android:id="@+id/shopping_list_sum"
+            android:text="@string/default_zero_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="@integer/item_list_price_weight"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_gravity="center_vertical"
+            android:gravity="end"
+            android:textColor="@color/horizontalDividerColor"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" />
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/horizontalDividerColor" />
+    <ScrollView
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <LinearLayout
+            android:id="@+id/shopping_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/item_list_vertical_padding"
+            android:orientation="vertical"
+            android:showDividers="middle|end"
+            android:divider="@drawable/horizontal_divider"/>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Shopping List</string>
+    <string name="price_hint">0.00</string>
+    <string name="currency">$</string>
+
+    <string name="default_list_name">Shopping list</string>
+    <string name="default_zero_price">0.00</string>
+    <string name="default_list_name_hint"><i>Shopping list</i></string>
+    <string name="empty_list">Nothing here yet</string>
+</resources>
