@@ -74,8 +74,6 @@ class MainListAdapter extends BaseAdapter {
         holder.dateTextView.setText(shoppingList.getStringCreatedTime());
         holder.sumTextView.setText(mDF.format(shoppingList.getSum()));
 
-        convertView.setOnTouchListener(new OnSwipeListener(100, 100));
-
         return convertView;
     }
 
