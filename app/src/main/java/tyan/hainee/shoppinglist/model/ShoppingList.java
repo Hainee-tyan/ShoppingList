@@ -26,14 +26,6 @@ public class ShoppingList extends RealmObject {
         mSum = 0d;
     }
 
-    public ShoppingList(int id, String name, long time, RealmList<ShoppingItem> items, double sum) {
-        mID = id;
-        mName = name;
-        mCreatedTime = time;
-        mItems = items;
-        mSum = sum;
-    }
-
     public int getID() {
         return mID;
     }
@@ -55,15 +47,18 @@ public class ShoppingList extends RealmObject {
     }
 
     public String getStringCreatedTime() {
-        return new SimpleDateFormat("dd MMM yyyy, kk:mm:ss", Locale.getDefault()).format(new Date(mCreatedTime));
+        return new SimpleDateFormat("dd MMM yyyy, kk:mm:ss", Locale.getDefault())
+                .format(new Date(mCreatedTime));
     }
 
     public String getStringCreatedDate() {
-        return new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date(mCreatedTime));
+        return new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                .format(new Date(mCreatedTime));
     }
 
     public String getStringCreatedDay() {
-        return new SimpleDateFormat("EEEE kk:mm:ss", Locale.getDefault()).format(new Date(mCreatedTime));
+        return new SimpleDateFormat("EEEE kk:mm:ss", Locale.getDefault())
+                .format(new Date(mCreatedTime));
     }
 
     public RealmList<ShoppingItem> getItems() {
@@ -76,13 +71,5 @@ public class ShoppingList extends RealmObject {
 
     public void setSum(double sum) {
         mSum = sum;
-    }
-
-    public boolean isEmpty() {
-        if (mItems.isEmpty()) return true;
-        for (ShoppingItem item : mItems) {
-            if (!item.isEmpty()) return false;
-        }
-        return true;
     }
 }

@@ -1,7 +1,7 @@
 package tyan.hainee.shoppinglist.util;
 
 public class PriceFormatter {
-    private static final String TAG = "PriceFormatter";
+    private final String TAG = "PriceFormatter";
 
     public static String formatPrice(String price) {
         StringBuilder formattedPrice = new StringBuilder(price);

@@ -15,7 +15,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import tyan.hainee.shoppinglist.R;
 import tyan.hainee.shoppinglist.model.ShoppingList;
-import tyan.hainee.shoppinglist.ui.widget.OnSwipeListener;
 
 class MainListAdapter extends BaseAdapter {
 

@@ -18,12 +18,6 @@ public class ShoppingItem extends RealmObject {
         this.mPrice = 0;
     }
 
-    public boolean isEmpty() {
-        return !mChecked
-                && mName.isEmpty()
-                && mPrice == 0;
-    }
-
     public boolean isChecked() {
         return mChecked;
     }

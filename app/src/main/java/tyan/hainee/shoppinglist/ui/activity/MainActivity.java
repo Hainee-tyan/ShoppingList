@@ -3,8 +3,6 @@ package tyan.hainee.shoppinglist.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -13,7 +11,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import tyan.hainee.shoppinglist.R;
@@ -50,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new MainListAdapter(this, mListArray);
         mListView.setAdapter(mAdapter);
         mListView.setEmptyView(findViewById(R.id.empty_list_view));
-
     }
 
     @OnItemClick(R.id.list)

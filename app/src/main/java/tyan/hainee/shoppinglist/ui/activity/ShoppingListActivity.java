@@ -63,11 +63,14 @@ public class ShoppingListActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            mListId = intent.getIntExtra(Constants.SHOPPING_LIST_ID_EXTRA, Constants.NON_EXISTENT_ID);
+            mListId = intent.getIntExtra(Constants.SHOPPING_LIST_ID_EXTRA, mListId);
         }
 
         mRealm = ((ShoppingListApplication) getApplication()).getRealm();
-        mShoppingList = mRealm.where(ShoppingList.class).equalTo("mID", mListId).findFirst();
+        mShoppingList = mRealm
+                .where(ShoppingList.class)
+                .equalTo(Constants.SHOPPING_LIST_ID_NAME, mListId)
+                .findFirst();
 
         if (mShoppingList == null) {
             mRealm.executeTransaction(new Realm.Transaction() {
@@ -126,7 +129,6 @@ public class ShoppingListActivity extends AppCompatActivity {
 
     @Override
     public void finish() {
-        updateShoppingList();
         setResult(RESULT_OK);
         super.finish();
     }
@@ -137,24 +139,22 @@ public class ShoppingListActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (getCurrentFocus() != null) {
+            getCurrentFocus().clearFocus();
+        }
+    }
 
-    public void addShoppingItem(int position) {
-        final ShoppingItem item = new ShoppingItem();
-        final int pos;
-        if (position < 0) {
-            pos = mItems.size();
-        }
-        else {
-            pos = position;
-        }
+    public void addShoppingItem(final int position) {
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                mItems.add(pos, item);
+                mItems.add(position, mRealm.createObject(ShoppingItem.class));
             }
         });
-
-        drawShoppingItem(item, position, true);
+        drawShoppingItem(mItems.get(position), position, true);
     }
 
     private void drawShoppingItem(ShoppingItem item, int position, boolean setFocus) {
@@ -181,7 +181,7 @@ public class ShoppingListActivity extends AppCompatActivity {
                     ((ShoppingItemView) mShoppingListView.getChildAt(i)).updateShoppingItem();
                 }
                 mShoppingList.setName(mNameView.getText().toString());
-                mShoppingList.setSum(mSum);
+                mShoppingList.setSum(mItems.sum("mPrice").doubleValue());
             }
         });
     }
@@ -192,7 +192,7 @@ public class ShoppingListActivity extends AppCompatActivity {
     }
 
     private class PriceChangeWatcher implements TextWatcher {
-        private static final String TAG = "PriceChangeWatcher";
+        private final String TAG = "PriceChangeWatcher";
 
         private double previousAddend;
 

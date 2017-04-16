@@ -23,10 +23,12 @@ public class ShoppingItemView extends LinearLayout {
 
     public ShoppingItemView(Context context) {
         this(context, null, 0);
+        initComponent();
     }
 
     public ShoppingItemView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        initComponent();
     }
 
     public ShoppingItemView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -64,13 +66,14 @@ public class ShoppingItemView extends LinearLayout {
         return mShoppingItem;
     }
 
-    public void updateShoppingItem() {
+    public boolean updateShoppingItem() {
         if (mShoppingItem == null) {
-            mShoppingItem = new ShoppingItem();
+            return false;
         }
         mShoppingItem.setChecked(mIsChecked.isChecked());
         mShoppingItem.setName(mName.getText().toString());
         mShoppingItem.setPrice(PriceFormatter.priceToDouble(mPrice.getText().toString()));
+        return true;
     }
 
     private void updateFieldsByItem() {
