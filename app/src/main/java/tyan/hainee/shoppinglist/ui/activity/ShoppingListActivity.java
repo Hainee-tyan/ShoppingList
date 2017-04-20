@@ -42,7 +42,7 @@ public class ShoppingListActivity extends AppCompatActivity {
     //Shopping list information
     private ShoppingList mShoppingList;
     private RealmList<ShoppingItem> mItems;
-    private int mListId = Constants.NON_EXISTENT_ID;
+    private long mCreatedTime;
     private double mSum;
 
     //Utils
@@ -62,22 +62,22 @@ public class ShoppingListActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Intent intent = getIntent();
+        mCreatedTime = System.currentTimeMillis();
         if (intent != null) {
-            mListId = intent.getIntExtra(Constants.SHOPPING_LIST_ID_EXTRA, mListId);
+            mCreatedTime = intent.getLongExtra(Constants.SHOPPING_LIST_CREATED_TIME_EXTRA, mCreatedTime);
         }
 
         mRealm = ((ShoppingListApplication) getApplication()).getRealm();
         mShoppingList = mRealm
                 .where(ShoppingList.class)
-                .equalTo(Constants.SHOPPING_LIST_ID_NAME, mListId)
+                .equalTo(Constants.SHOPPING_LIST_CREATED_TIME_NAME, mCreatedTime)
                 .findFirst();
 
         if (mShoppingList == null) {
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    int id = (int) (100000 + (Math.random() * 100000));
-                    mShoppingList = realm.createObject(ShoppingList.class, id);
+                    mShoppingList = realm.createObject(ShoppingList.class, System.currentTimeMillis());
                 }
             });
         }

@@ -13,25 +13,17 @@ import io.realm.annotations.RealmClass;
 public class ShoppingList extends RealmObject {
 
     @PrimaryKey
-    private int mID;
-    private String mName;
     private long mCreatedTime;
+    private String mName;
     private RealmList<ShoppingItem> mItems;
     private double mSum;
+    private boolean mIsDeleted;
 
     public ShoppingList() {
         mItems = new RealmList<>();
-        mCreatedTime = System.currentTimeMillis();
         mName = "";
         mSum = 0d;
-    }
-
-    public int getID() {
-        return mID;
-    }
-
-    public void setID(int id) {
-        mID = id;
+        mIsDeleted = false;
     }
 
     public String getName() {
@@ -40,6 +32,10 @@ public class ShoppingList extends RealmObject {
 
     public void setName(String name) {
         mName = name;
+    }
+
+    public void setCreatedTime(long time) {
+        mCreatedTime = time;
     }
 
     public long getCreatedTime() {
@@ -71,5 +67,13 @@ public class ShoppingList extends RealmObject {
 
     public void setSum(double sum) {
         mSum = sum;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        mIsDeleted = isDeleted;
+    }
+
+    public boolean isDeleted() {
+        return mIsDeleted;
     }
 }

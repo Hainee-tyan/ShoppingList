@@ -7,4 +7,8 @@
     <string name="default_zero_price">0.00</string>
     <string name="default_list_name_hint"><i>Shopping list</i></string>
     <string name="empty_list">Nothing here yet</string>
+    <string name="delete_icon">Delete icon</string>
+
+    <string name="delete_snackbar_text">Deleted shopping list:\n%1$s</string>
+    <string name="delete_snackbar_action">CANCEL</string>
 </resources>
