@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -13,7 +14,7 @@ import tyan.hainee.shoppinglist.R;
 import tyan.hainee.shoppinglist.model.ShoppingItem;
 import tyan.hainee.shoppinglist.util.PriceFormatter;
 
-public class ShoppingItemView extends LinearLayout {
+public class ShoppingItemView extends SwipeView {
     public final String TAG = "ShoppingItemView";
 
     private ShoppingItem mShoppingItem;
@@ -23,7 +24,6 @@ public class ShoppingItemView extends LinearLayout {
 
     public ShoppingItemView(Context context) {
         this(context, null, 0);
-        initComponent();
     }
 
     public ShoppingItemView(Context context, AttributeSet attrs) {
@@ -37,8 +37,12 @@ public class ShoppingItemView extends LinearLayout {
     }
 
     private void initComponent() {
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.shopping_item, this);
+//        setOrientation(LinearLayout.HORIZONTAL);
+//        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+//
+//        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        inflater.inflate(R.layout.shopping_item, this, true);
+        setSwipingView(R.layout.shopping_item, R.id.shopping_item);
         mIsChecked = (CheckBox) findViewById(R.id.item_checkbox);
         mName = (EditText) findViewById(R.id.item_name);
         mPrice = (EditText) findViewById(R.id.item_price);
@@ -56,13 +60,17 @@ public class ShoppingItemView extends LinearLayout {
         mPrice.setText(PriceFormatter.formatPrice(String.valueOf(price)));
     }
 
+    public double getPrice() {
+        return PriceFormatter.priceToDouble(mPrice.getText().toString());
+    }
+
     public void setShoppingItem(ShoppingItem shoppingItem) {
         mShoppingItem = shoppingItem;
         updateFieldsByItem();
     }
 
     public ShoppingItem getShoppingItem() {
-        updateShoppingItem();
+//        updateShoppingItem();
         return mShoppingItem;
     }
 

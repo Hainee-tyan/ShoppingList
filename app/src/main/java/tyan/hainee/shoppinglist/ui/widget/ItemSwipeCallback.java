@@ -22,7 +22,7 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
     private View mSwipingView;
     private View mDeleteView;
     private View mDeleteIcon;
-    private float mDeleteIconWidth;
+    private int mDeleteIconWidth;
     private float mDeleteThreshold;
 
 
@@ -75,7 +75,7 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
 
     @Override
     public float getSwipeThreshold(RecyclerView.ViewHolder viewHolder) {
-        return super.getSwipeThreshold(viewHolder) * 0.5f;
+        return .25f;
     }
 
     @Override
@@ -88,4 +88,3 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
         return true;
     }
 }
-

@@ -2,11 +2,16 @@ package tyan.hainee.shoppinglist.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -26,6 +31,7 @@ import tyan.hainee.shoppinglist.model.ShoppingList;
 import tyan.hainee.shoppinglist.ui.widget.CheckedItemListener;
 import tyan.hainee.shoppinglist.ui.widget.PriceWatcher;
 import tyan.hainee.shoppinglist.ui.widget.ShoppingItemView;
+import tyan.hainee.shoppinglist.ui.widget.SwipeView;
 import tyan.hainee.shoppinglist.util.Constants;
 
 public class ShoppingListActivity extends AppCompatActivity {
@@ -38,6 +44,8 @@ public class ShoppingListActivity extends AppCompatActivity {
     TextView mSumView;
     @BindView(R.id.shopping_list_name)
     EditText mNameView;
+    @BindView(R.id.shopping_list_activity)
+    View mMainView;
 
     //Shopping list information
     private ShoppingList mShoppingList;
@@ -48,12 +56,15 @@ public class ShoppingListActivity extends AppCompatActivity {
     //Utils
     private Realm mRealm;
     private DecimalFormat mDecimalFormat;
+    private Snackbar mSnackBar;
 
     //Listeners and watchers
     private AddViewActionListener mAddViewActionListener;
     private PriceWatcher mPriceWatcher;
     private CheckedItemListener mCheckedItemListener;
     private PriceChangeWatcher mPriceChangeWatcher;
+    private OnDismissListener mOnDismissListener;
+    private ShoppingItemView mDeletedView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +102,20 @@ public class ShoppingListActivity extends AppCompatActivity {
         mDecimalFormat.setDecimalFormatSymbols(dfs);
         mDecimalFormat.setMaximumFractionDigits(2);
 
+        mSnackBar = Snackbar
+                .make(mMainView, "", Snackbar.LENGTH_LONG)
+                .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setAction(R.string.delete_snackbar_action, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (mDeletedView != null) {
+                            mDeletedView.restore();
+                            changeSum(mDeletedView.getPrice(), 0);
+                            mDeletedView = null;
+                        }
+                    }
+                });
+
         String name = mShoppingList.getName().isEmpty() ? "" : mShoppingList.getName();
         mNameView.setText(name);
         mSum = mShoppingList.getSum();
@@ -102,6 +127,7 @@ public class ShoppingListActivity extends AppCompatActivity {
         mCheckedItemListener = new CheckedItemListener();
         mPriceWatcher = new PriceWatcher();
         mPriceChangeWatcher = new PriceChangeWatcher();
+        mOnDismissListener = new OnDismissListener();
 
         for (ShoppingItem item : mItems) {
             drawShoppingItem(item, -1, false);
@@ -169,6 +195,7 @@ public class ShoppingListActivity extends AppCompatActivity {
         }
 
         view.setPriceChangeWatcher(mPriceChangeWatcher);
+        view.setOnViewDismissListener(mOnDismissListener);
         mShoppingListView.addView(view, position);
     }
 
@@ -178,7 +205,13 @@ public class ShoppingListActivity extends AppCompatActivity {
             @Override
             public void execute(Realm realm) {
                 for (int i = 0; i < mShoppingListView.getChildCount(); i++) {
-                    ((ShoppingItemView) mShoppingListView.getChildAt(i)).updateShoppingItem();
+                    ShoppingItemView itemView = (ShoppingItemView) mShoppingListView.getChildAt(i);
+                    if (itemView.getVisibility() == View.GONE) {
+                        mItems.remove(itemView.getShoppingItem());
+                    }
+                    else {
+                        itemView.updateShoppingItem();
+                    }
                 }
                 mShoppingList.setName(mNameView.getText().toString());
                 mShoppingList.setSum(mItems.sum("mPrice").doubleValue());
@@ -189,6 +222,17 @@ public class ShoppingListActivity extends AppCompatActivity {
     private void changeSum(double addend, double subtrahend) {
         mSum = mSum - subtrahend + addend;
         mSumView.setText(mDecimalFormat.format(mSum));
+    }
+
+    private class OnDismissListener implements SwipeView.OnViewDismissListener {
+        @Override
+        public void onDismiss(View view) {
+            if (mShoppingListView.getChildCount() <= 1) {
+            }
+            changeSum(0, ((ShoppingItemView) view).getPrice());
+            mDeletedView = (ShoppingItemView) view;
+            mSnackBar.setText("1 item deleted").show();
+        }
     }
 
     private class PriceChangeWatcher implements TextWatcher {
@@ -232,6 +276,26 @@ public class ShoppingListActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.shopping_list_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_item: {
+                addShoppingItem(mShoppingListView.getChildCount());
+                return true;
+            }
+            default : {
+                return super.onOptionsItemSelected(item);
+            }
+
         }
     }
 }

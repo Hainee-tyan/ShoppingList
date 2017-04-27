@@ -10,4 +10,6 @@
 
     <string name="delete_snackbar_text">Удалён список покупок:\n%1$s</string>
     <string name="delete_snackbar_action">ОТМЕНИТЬ</string>
+
+    <string name="menu_add">Добавить элемент</string>
 </resources>
