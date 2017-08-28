@@ -13,6 +13,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 
 import tyan.hainee.shoppinglist.R;
@@ -23,18 +24,20 @@ public class SwipeView extends RelativeLayout {
     private LayoutInflater mInflater;
 
     private int mDeletionColor;
-    private int mNonDeletionColor;
+    private int mBackgroundColor;
+    private int mCopyColor;
 
-    private View mDeletionView;
+    private View mBackgroundView;
     private View mDeleteIcon;
-    private int mDeleteIconWidth;
+    private View mCopyIcon;
+    private int mIconWidth;
 
     private float mDownX;
     private float mDownY;
     private boolean mSwiping;
     private float mTranslationX;
     private VelocityTracker mVelocityTracker;
-    private OnViewDismissListener mListener;
+    private OnViewDismissListener mDismissListener;
 
     private View mSwipingView;
     private int mViewWidth = 1;
@@ -43,6 +46,7 @@ public class SwipeView extends RelativeLayout {
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
     private long mAnimationTime;
+    private OnViewCopyListener mCopyListener;
 
     public SwipeView(Context context) {
         super(context);
@@ -50,24 +54,26 @@ public class SwipeView extends RelativeLayout {
 
     public SwipeView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initSwipe();
+        init();
     }
 
     public SwipeView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initSwipe();
+        init();
     }
 
-    private void initSwipe() {
+    private void init() {
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         mInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mInflater.inflate(R.layout.swipe_view, this, true);
 
-        mDeletionView = findViewById(R.id.delete_view);
+        mBackgroundView = findViewById(R.id.background_view);
         mDeleteIcon = findViewById(R.id.delete_icon);
+        mCopyIcon = findViewById(R.id.copy_icon);
 
-        mDeletionColor = ContextCompat.getColor(getContext(), R.color.deletion);
-        mNonDeletionColor = ContextCompat.getColor(getContext(), R.color.transparentDeletion);
+        mDeletionColor = ContextCompat.getColor(getContext(), R.color.swipeDismissColor);
+        mCopyColor = ContextCompat.getColor(getContext(), R.color.swipeCopyColor);
+        mBackgroundColor = ContextCompat.getColor(getContext(), R.color.swipeBackgroundColor);
 
         ViewConfiguration vc = ViewConfiguration.get(getContext());
         mSlop = vc.getScaledTouchSlop();
@@ -111,17 +117,23 @@ public class SwipeView extends RelativeLayout {
 
                 float deltaX = ev.getRawX() - mDownX;
                 boolean dismiss = false;
+                boolean copy = false;
 
-                if (mSwiping && -deltaX > mViewWidth * getSwipeThreshold()) {
-                    dismiss = true;
-//                } else if (mSwiping
-//                        && mMinFlingVelocity <= absVelocityX
-//                        && absVelocityX <= mMaxFlingVelocity
-//                        && absVelocityY < absVelocityX) {
-//                    dismiss = (velocityX < 0) == (deltaX < 0);
+                if (mSwiping) {
+                    if (Math.abs(deltaX) > mViewWidth * getSwipeThreshold()) {
+                        dismiss = deltaX < 0;
+                        copy = deltaX > 0;
+                    } else if (absVelocityX >= mMinFlingVelocity
+                            && absVelocityX <= mMaxFlingVelocity
+                            && absVelocityX > absVelocityY) {
+                        dismiss = (velocityX < 0) && (deltaX < 0);
+                        copy = (velocityX > 0) && (deltaX > 0);
+                    }
+
                 }
 
                 if (dismiss) {
+                    mBackgroundView.setBackgroundColor(mDeletionColor);
                     mSwipingView.animate()
                             .translationX(-mViewWidth)
                             .setDuration(mAnimationTime)
@@ -132,15 +144,17 @@ public class SwipeView extends RelativeLayout {
                                 }
                             });
                     mDeleteIcon.animate()
-                            .translationX(mDeleteIconWidth - mViewWidth)
+                            .translationX(mIconWidth - mViewWidth)
                             .setDuration(mAnimationTime);
                 } else if (mSwiping) {
                     mSwipingView.animate()
                             .translationX(0)
-                            .setDuration(mAnimationTime)
-                            .setListener(null);
+                            .setDuration(mAnimationTime);
                     mDeleteIcon.animate()
-                            .translationX(mDeleteIconWidth)
+                            .translationX(mIconWidth)
+                            .setDuration(mAnimationTime);
+                    mCopyIcon.animate()
+                            .translationX(-mIconWidth)
                             .setDuration(mAnimationTime);
                 }
                 mVelocityTracker.recycle();
@@ -160,7 +174,7 @@ public class SwipeView extends RelativeLayout {
                 mVelocityTracker.addMovement(ev);
                 float deltaX = ev.getRawX() - mDownX;
                 float deltaY = ev.getRawY() - mDownY;
-                if (-deltaX > mSlop && Math.abs(deltaY) < Math.abs(deltaX) / 2) {
+                if (Math.abs(deltaX) > mSlop && Math.abs(deltaY) < Math.abs(deltaX) / 2) {
                     mSwiping = true;
                     getParent().requestDisallowInterceptTouchEvent(true);
 
@@ -177,16 +191,18 @@ public class SwipeView extends RelativeLayout {
                 if (mSwiping) {
                     mTranslationX = deltaX;
                     float translationX = deltaX + mSlop;
-                    if (translationX > 0)
-                        translationX = 0;
+
                     mSwipingView.setTranslationX(translationX);
-                    mDeleteIcon.setTranslationX(mDeleteIconWidth + translationX);
+                    mDeleteIcon.setTranslationX(mIconWidth + translationX);
+                    mCopyIcon.setTranslationX(-mIconWidth + translationX);
                     if (-deltaX > mViewWidth * getSwipeThreshold()) {
-                        mDeletionView.setBackgroundColor(mDeletionColor);
+                        mBackgroundView.setBackgroundColor(mDeletionColor);
+                    } else if (deltaX > mViewWidth * getSwipeThreshold()) {
+                        mBackgroundView.setBackgroundColor(mCopyColor);
+                    } else {
+                        mBackgroundView.setBackgroundColor(mBackgroundColor);
                     }
-                    else {
-                        mDeletionView.setBackgroundColor(mNonDeletionColor);
-                    }
+
                     return false;
                 }
                 break;
@@ -198,10 +214,12 @@ public class SwipeView extends RelativeLayout {
 
                 mSwipingView.animate()
                         .translationX(0)
-                        .setDuration(mAnimationTime)
-                        .setListener(null);
+                        .setDuration(mAnimationTime);
                 mDeleteIcon.animate()
-                        .translationX(mDeleteIconWidth)
+                        .translationX(mIconWidth)
+                        .setDuration(mAnimationTime);
+                mCopyIcon.animate()
+                        .translationX(-mIconWidth)
                         .setDuration(mAnimationTime);
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
@@ -232,40 +250,56 @@ public class SwipeView extends RelativeLayout {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                 int measuredHeight = mSwipingView.getMeasuredHeight();
-                if (measuredHeight != mDeletionView.getMeasuredHeight()) {
-                    ViewGroup.LayoutParams lp = mDeletionView.getLayoutParams();
+                if (measuredHeight != mBackgroundView.getMeasuredHeight()) {
+                    ViewGroup.LayoutParams lp = mBackgroundView.getLayoutParams();
                     lp.height = measuredHeight;
-                    mDeletionView.setLayoutParams(lp);
+                    mBackgroundView.setLayoutParams(lp);
                 }
             }
         });
 
         int measuredHeight = mSwipingView.getMeasuredHeight();
 
-        mDeletionView.getLayoutParams().height = measuredHeight;
+        mBackgroundView.getLayoutParams().height = measuredHeight;
         mDeleteIcon.getLayoutParams().height = measuredHeight;
         mDeleteIcon.getLayoutParams().width = measuredHeight;
         mDeleteIcon.setTranslationX(measuredHeight);
-        mDeleteIconWidth = measuredHeight;
+        mCopyIcon.getLayoutParams().height = measuredHeight;
+        mCopyIcon.getLayoutParams().width = measuredHeight;
+        mCopyIcon.setTranslationX(-measuredHeight);
+        mIconWidth = measuredHeight;
     }
 
     public interface OnViewDismissListener {
         void onDismiss(View view);
     }
 
+    public interface OnViewCopyListener {
+        void onCopy(View view);
+    }
+
     public void setOnViewDismissListener(OnViewDismissListener listener) {
-        mListener = listener;
+        mDismissListener = listener;
+    }
+
+    public void setOnViewCopyListener(OnViewCopyListener listener) {
+        mCopyListener = listener;
     }
 
     public void restore() {
         setVisibility(View.VISIBLE);
         mSwipingView.setTranslationX(0);
 
+        animateAppearance();
+    }
+
+    public void animateAppearance() {
         final ViewGroup.LayoutParams lp = getLayoutParams();
-        measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         final int height = getMeasuredHeight();
 
         ValueAnimator animator = ValueAnimator.ofInt(0, height).setDuration(mAnimationTime);
+
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -284,22 +318,20 @@ public class SwipeView extends RelativeLayout {
 
         ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 0).setDuration(mAnimationTime);
 
-//        if (mListener != null) {
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    setVisibility(View.GONE);
-                    if (mListener != null) {
-                        mListener.onDismiss(view);
-                    }
-//                mCallbacks.onDismiss(mView, mToken);
-                    // Reset view presentation
-//                setTranslationX(0);
-//                lp.height = originalHeight;
-//                setLayoutParams(lp);
+        if (hasFocus()) {
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setVisibility(View.GONE);
+                if (mDismissListener != null) {
+                    mDismissListener.onDismiss(view);
                 }
-            });
-//        }
+            }
+        });
 
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

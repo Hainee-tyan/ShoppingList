@@ -1,15 +1,22 @@
 <resources>
     <string name="app_name">Shopping List</string>
-    <string name="price_hint">0.00</string>
+
+    <!--DECIMALS-->
     <string name="currency">$</string>
+    <string name="price_hint">0.00</string>
+    <string name="default_zero_price">0.00</string>
 
     <string name="default_list_name">Shopping list</string>
-    <string name="default_zero_price">0.00</string>
     <string name="default_list_name_hint"><i>Shopping list</i></string>
-    <string name="empty_list">Nothing here yet</string>
-    <string name="delete_icon">Delete icon</string>
 
+    <string name="empty_list">Nothing here yet</string>
+
+    <!--DELETION-->
+    <string name="delete_icon">Delete icon</string>
+    <string name="copy_icon">Copy icon</string>
     <string name="delete_snackbar_text">Deleted shopping list:\n%1$s</string>
     <string name="delete_snackbar_action">CANCEL</string>
+    <string name="delete_item_cnackbar_text">Deleted item:\n%1$s</string>
+
     <string name="menu_add">Add new item</string>
 </resources>

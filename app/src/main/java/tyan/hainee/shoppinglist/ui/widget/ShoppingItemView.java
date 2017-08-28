@@ -3,11 +3,9 @@ package tyan.hainee.shoppinglist.ui.widget;
 import android.content.Context;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import tyan.hainee.shoppinglist.R;
@@ -70,7 +68,6 @@ public class ShoppingItemView extends SwipeView {
     }
 
     public ShoppingItem getShoppingItem() {
-//        updateShoppingItem();
         return mShoppingItem;
     }
 
@@ -95,8 +92,10 @@ public class ShoppingItemView extends SwipeView {
         mPrice.setOnEditorActionListener(listener);
     }
 
-    public void setFocus() {
+    public void showKeyboard() {
         mName.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mName, InputMethodManager.SHOW_IMPLICIT);
     }
 
     public void setPriceChangeWatcher(TextWatcher priceChangeWatcher) {

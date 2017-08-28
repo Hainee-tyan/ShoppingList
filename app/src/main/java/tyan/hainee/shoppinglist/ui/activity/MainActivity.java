@@ -12,18 +12,10 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.Locale;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
 import tyan.hainee.shoppinglist.R;
-import tyan.hainee.shoppinglist.ShoppingListApplication;
-import tyan.hainee.shoppinglist.model.ShoppingList;
-import tyan.hainee.shoppinglist.ui.adapter.RecyclerViewAdapter;
+import tyan.hainee.shoppinglist.ui.presenter.MainPresenter;
 import tyan.hainee.shoppinglist.ui.widget.ItemSwipeCallback;
 import tyan.hainee.shoppinglist.util.Constants;
 import tyan.hainee.shoppinglist.util.ItemClickSupport;
@@ -39,12 +31,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.empty_list_view)
     TextView mEmptyView;
 
-    private RecyclerViewAdapter mAdapter;
-    private Realm mRealm;
-    private RealmResults<ShoppingList> mListArray;
-
-    private ShoppingList mDeletedList;
-
+    private MainPresenter mPresenter;
     private Snackbar mSnackBar;
 
     @Override
@@ -53,118 +40,61 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mRealm = ((ShoppingListApplication) getApplication()).getRealm();
-        mListArray = mRealm.where(ShoppingList.class)
-                .equalTo(Constants.SHOPPING_LIST_IS_DELETED_NAME, false)
-                .findAllSorted(Constants.SHOPPING_LIST_CREATED_TIME_NAME, Sort.DESCENDING);
+        mPresenter = new MainPresenter(this);
+        mPresenter.init();
+        initRecyclerView();
 
+        mSnackBar = Snackbar
+                .make(mMainView, "", Snackbar.LENGTH_LONG)
+                .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setAction(R.string.delete_snackbar_action, mPresenter.getOnRestoreListener());
+        findViewById(R.id.fab).setOnClickListener(mPresenter.getOnAddListListener());
+    }
+
+    private void initRecyclerView() {
         mListView.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL);
         dividerItemDecoration.setDrawable(ContextCompat.getDrawable(this, R.drawable.horizontal_divider));
         mListView.addItemDecoration(dividerItemDecoration);
+        mListView.setAdapter(mPresenter.getAdapter());
 
-        mAdapter = new RecyclerViewAdapter(this, mListArray);
-        mListView.setAdapter(mAdapter);
+        ItemClickSupport.addTo(mListView).setOnItemClickListener(mPresenter.getOnItemClickListener());
+        (new ItemTouchHelper(new ItemSwipeCallback(this, mPresenter.getOnSwipeListener()))).attachToRecyclerView(mListView);
 
-        ItemClickSupport.addTo(mListView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+        mListView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                startShoppingListActivity(mAdapter.getList(position).getCreatedTime());
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                checkIfEmpty();
             }
         });
-
-        (new ItemTouchHelper(new ItemSwipeCallback(this))).attachToRecyclerView(mListView);
-
-        mSnackBar = Snackbar
-                .make(mMainView, "", Snackbar.LENGTH_LONG)
-                .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .setAction(R.string.delete_snackbar_action, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        restoreList();
-                    }
-                });
-        checkIfEmpty();
-    }
-
-    @OnClick(R.id.fab)
-    void addNewList() {
-        final long createdTime = System.currentTimeMillis();
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.createObject(ShoppingList.class, createdTime);
-            }
-        });
-        startShoppingListActivity(createdTime);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == Constants.SHOPPING_LIST_REQUEST_CODE ) {
-            mAdapter.notifyDataSetChanged();
-            checkIfEmpty();
+            mPresenter.getAdapter().notifyDataSetChanged();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mRealm.close();
+        mPresenter.detach();
     }
 
-    private void startShoppingListActivity(long createdTime) {
+    public void startShoppingListActivity(long createdTime) {
         Intent intent = new Intent(getApplicationContext(), ShoppingListActivity.class);
         intent.putExtra(Constants.SHOPPING_LIST_CREATED_TIME_EXTRA, createdTime);
         startActivityForResult(intent, Constants.SHOPPING_LIST_REQUEST_CODE);
     }
 
-    private void checkIfEmpty() {
-        if (mListArray == null || mListArray.isEmpty()) {
-            mListView.setVisibility(View.GONE);
-            mEmptyView.setVisibility(View.VISIBLE);
-        }
-        else {
-            mListView.setVisibility(View.VISIBLE);
-            mEmptyView.setVisibility(View.GONE);
-        }
+    public void checkIfEmpty() {
+        mListView.setVisibility(mPresenter.isEmpty() ? View.GONE : View.VISIBLE);
+        mEmptyView.setVisibility(mPresenter.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    public void deleteList(int position) {
-        mDeletedList = mListArray.get(position);
-
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                mDeletedList.setDeleted(true);
-            }
-        });
-        mAdapter.notifyItemRemoved(position);
-        checkIfEmpty();
-
-        String listName = mDeletedList.getName();
-        listName = (listName.isEmpty() || listName.equals("")) ?
-                getResources().getString(R.string.default_list_name) : listName;
-
-        String snackBarText = String.format(Locale.getDefault(),
-                getResources().getString(R.string.delete_snackbar_text),
-                listName);
-
-        mSnackBar.setText(snackBarText).show();
-    }
-
-    private void restoreList() {
-        if (mDeletedList == null) return;
-
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                mDeletedList.setDeleted(false);
-            }
-        });
-        mAdapter.notifyItemInserted(mListArray.indexOf(mDeletedList));
-        checkIfEmpty();
-        mDeletedList = null;
+    public void showSnackBar(String text) {
+        mSnackBar.setText(text).show();
     }
 }

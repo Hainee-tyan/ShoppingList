@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -130,11 +131,11 @@ public class ShoppingListActivity extends AppCompatActivity {
         mOnDismissListener = new OnDismissListener();
 
         for (ShoppingItem item : mItems) {
-            drawShoppingItem(item, -1, false);
+            drawShoppingItem(item, -1, false, false);
         }
 
         if (mItems.isEmpty()) {
-            addShoppingItem(0);
+            addShoppingItem(0, false);
         }
     }
 
@@ -173,30 +174,35 @@ public class ShoppingListActivity extends AppCompatActivity {
         }
     }
 
-    public void addShoppingItem(final int position) {
+    public void addShoppingItem(final int position, boolean animate) {
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 mItems.add(position, mRealm.createObject(ShoppingItem.class));
             }
         });
-        drawShoppingItem(mItems.get(position), position, true);
+        drawShoppingItem(mItems.get(position), position, true, animate);
     }
 
-    private void drawShoppingItem(ShoppingItem item, int position, boolean setFocus) {
-        ShoppingItemView view = new ShoppingItemView(this);
+    private void drawShoppingItem(ShoppingItem item, int position, boolean showKeyboard, boolean animate) {
+        final ShoppingItemView view = new ShoppingItemView(this);
         view.setImeActionListener(mAddViewActionListener);
         view.setCheckedItemListener(mCheckedItemListener);
         view.setPriceWatcher(mPriceWatcher);
 
         view.setShoppingItem(item);
-        if (setFocus) {
-            view.setFocus();
-        }
 
         view.setPriceChangeWatcher(mPriceChangeWatcher);
         view.setOnViewDismissListener(mOnDismissListener);
         mShoppingListView.addView(view, position);
+
+        if (animate) {
+            view.animateAppearance();
+        }
+
+        if (showKeyboard) {
+            view.showKeyboard();
+        }
     }
 
 
@@ -227,8 +233,6 @@ public class ShoppingListActivity extends AppCompatActivity {
     private class OnDismissListener implements SwipeView.OnViewDismissListener {
         @Override
         public void onDismiss(View view) {
-            if (mShoppingListView.getChildCount() <= 1) {
-            }
             changeSum(0, ((ShoppingItemView) view).getPrice());
             mDeletedView = (ShoppingItemView) view;
             mSnackBar.setText("1 item deleted").show();
@@ -272,7 +276,7 @@ public class ShoppingListActivity extends AppCompatActivity {
         public boolean onEditorAction(TextView textView, int keyCode, KeyEvent keyEvent) {
             if (keyCode == EditorInfo.IME_ACTION_NEXT) {
                 int position = mShoppingListView.indexOfChild(mShoppingListView.getFocusedChild());
-                addShoppingItem(position + 1);
+                addShoppingItem(position + 1, true);
                 return true;
             }
             return false;
@@ -289,7 +293,7 @@ public class ShoppingListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_item: {
-                addShoppingItem(mShoppingListView.getChildCount());
+                addShoppingItem(mShoppingListView.getChildCount(), true);
                 return true;
             }
             default : {

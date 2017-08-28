@@ -16,16 +16,16 @@ import butterknife.ButterKnife;
 import tyan.hainee.shoppinglist.R;
 import tyan.hainee.shoppinglist.model.ShoppingList;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHolder> {
 
-    private final String TAG = "RecyclerViewAdapter";
+    private final String TAG = "MainListAdapter";
 
     private LayoutInflater mInflater;
     private List<ShoppingList> mList;
     private DecimalFormat mDF;
     private Context mContext;
 
-    public RecyclerViewAdapter(Context context, List<ShoppingList> list) {
+    public MainListAdapter(Context context, List<ShoppingList> list) {
         mContext = context;
         mList = list;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

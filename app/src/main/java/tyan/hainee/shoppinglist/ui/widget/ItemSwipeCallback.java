@@ -8,13 +8,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import tyan.hainee.shoppinglist.R;
-import tyan.hainee.shoppinglist.ui.activity.MainActivity;
 
 public class ItemSwipeCallback extends ItemTouchHelper.Callback {
 
     private final String TAG = "ItemSwipeCallback";
 
-    private Context mContext;
     private int mDeletionColor;
     private int mNonDeletionColor;
 
@@ -24,13 +22,14 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
     private View mDeleteIcon;
     private int mDeleteIconWidth;
     private float mDeleteThreshold;
+    private OnSwipeListener mListener;
 
 
-    public ItemSwipeCallback(Context context) {
-        mContext = context;
+    public ItemSwipeCallback(Context context, OnSwipeListener listener) {
+        mDeletionColor = ContextCompat.getColor(context, R.color.swipeDismissColor);
+        mNonDeletionColor = ContextCompat.getColor(context, R.color.swipeBackgroundColor);
 
-        mDeletionColor = ContextCompat.getColor(mContext, R.color.deletion);
-        mNonDeletionColor = ContextCompat.getColor(mContext, R.color.transparentDeletion);
+        mListener = listener;
     }
 
     @Override
@@ -47,7 +46,7 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        ((MainActivity) mContext).deleteList(viewHolder.getAdapterPosition());
+        mListener.onSwiped(viewHolder.getAdapterPosition());
     }
 
     @Override
@@ -86,5 +85,9 @@ public class ItemSwipeCallback extends ItemTouchHelper.Callback {
     @Override
     public boolean isItemViewSwipeEnabled() {
         return true;
+    }
+
+    public interface OnSwipeListener {
+        void onSwiped(int position);
     }
 }
