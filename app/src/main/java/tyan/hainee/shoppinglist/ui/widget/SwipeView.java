@@ -6,7 +6,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -14,6 +13,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import tyan.hainee.shoppinglist.R;
@@ -157,6 +157,11 @@ public class SwipeView extends RelativeLayout {
                             .translationX(-mIconWidth)
                             .setDuration(mAnimationTime);
                 }
+
+                if (copy && mCopyListener != null) {
+                    mCopyListener.onCopy(this);
+                }
+
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
                 mTranslationX = 0;
@@ -270,14 +275,6 @@ public class SwipeView extends RelativeLayout {
         mIconWidth = measuredHeight;
     }
 
-    public interface OnViewDismissListener {
-        void onDismiss(View view);
-    }
-
-    public interface OnViewCopyListener {
-        void onCopy(View view);
-    }
-
     public void setOnViewDismissListener(OnViewDismissListener listener) {
         mDismissListener = listener;
     }
@@ -294,7 +291,8 @@ public class SwipeView extends RelativeLayout {
     }
 
     public void animateAppearance() {
-        final ViewGroup.LayoutParams lp = getLayoutParams();
+        final ViewGroup.LayoutParams initialLP = getLayoutParams();
+        final ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(initialLP.width, initialLP.height);
         measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         final int height = getMeasuredHeight();
 
@@ -308,24 +306,33 @@ public class SwipeView extends RelativeLayout {
             }
         });
 
+        //This is needed for multiline edittext to work
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setLayoutParams(initialLP);
+            }
+        });
+
         animator.start();
     }
 
     private void performDismiss() {
-        final ViewGroup.LayoutParams lp = getLayoutParams();
+        final ViewGroup.LayoutParams initialLP = getLayoutParams();
+        final ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(initialLP.width, initialLP.height);
         final int originalHeight = getHeight();
         final View view = this;
 
         ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 0).setDuration(mAnimationTime);
 
-        if (hasFocus()) {
-            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getWindowToken(), 0);
-        }
-
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (hasFocus()) {
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                }
+                setLayoutParams(initialLP);
                 setVisibility(View.GONE);
                 if (mDismissListener != null) {
                     mDismissListener.onDismiss(view);
@@ -342,5 +349,13 @@ public class SwipeView extends RelativeLayout {
         });
 
         animator.start();
+    }
+
+    public interface OnViewDismissListener {
+        void onDismiss(View view);
+    }
+
+    public interface OnViewCopyListener {
+        void onCopy(View view);
     }
 }

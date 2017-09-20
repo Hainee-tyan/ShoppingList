@@ -1,5 +1,4 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_margin">16dp</dimen>
@@ -8,8 +7,8 @@
 
     <dimen name="vertical_divider_width">2dp</dimen>
     <dimen name="horizontal_divider_height">1dp</dimen>
-
-    <dimen name="divider_horizontal_margin">4dp</dimen>
+    <dimen name="dialog_divider_size">2dp</dimen>
+    <dimen name="divider_margin">4dp</dimen>
 
     <dimen name="item_list_horizontal_padding">16dp</dimen>
     <dimen name="item_list_vertical_padding">16dp</dimen>
@@ -25,4 +24,5 @@
     <dimen name="list_padding">8dp</dimen>
     <dimen name="list_big_text_size">18sp</dimen>
     <dimen name="list_name_padding_bottom">4dp</dimen>
+    <dimen name="dialog_title_textsize">20sp</dimen>
 </resources>

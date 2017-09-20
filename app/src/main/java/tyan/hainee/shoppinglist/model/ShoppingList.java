@@ -14,16 +14,36 @@ public class ShoppingList extends RealmObject {
 
     @PrimaryKey
     private long mCreatedTime;
-    private String mName;
-    private RealmList<ShoppingItem> mItems;
-    private double mSum;
-    private boolean mIsDeleted;
 
-    public ShoppingList() {
-        mItems = new RealmList<>();
-        mName = "";
-        mSum = 0d;
-        mIsDeleted = false;
+    private long mShoppingTime = System.currentTimeMillis();
+    private String mShopName = "";
+    private String mName = "";
+    private RealmList<ShoppingItem> mItems = new RealmList<>();
+    private double mSum = 0d;
+    private boolean mIsDeleted = false;
+
+    public long getCreatedTime() {
+        return mCreatedTime;
+    }
+
+//    public void setCreatedTime(long time) {
+//        mCreatedTime = time;
+//    }
+
+    public long getShoppingTime() {
+        return mShoppingTime;
+    }
+
+    public void setShoppingTime(long time) {
+        mShoppingTime = time;
+    }
+
+    public String getShopName() {
+        return mShopName;
+    }
+
+    public void setShopName(String name) {
+        mShopName = name;
     }
 
     public String getName() {
@@ -32,29 +52,6 @@ public class ShoppingList extends RealmObject {
 
     public void setName(String name) {
         mName = name;
-    }
-
-    public void setCreatedTime(long time) {
-        mCreatedTime = time;
-    }
-
-    public long getCreatedTime() {
-        return mCreatedTime;
-    }
-
-    public String getStringCreatedTime() {
-        return new SimpleDateFormat("dd MMM yyyy, kk:mm:ss", Locale.getDefault())
-                .format(new Date(mCreatedTime));
-    }
-
-    public String getStringCreatedDate() {
-        return new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                .format(new Date(mCreatedTime));
-    }
-
-    public String getStringCreatedDay() {
-        return new SimpleDateFormat("EEEE kk:mm:ss", Locale.getDefault())
-                .format(new Date(mCreatedTime));
     }
 
     public RealmList<ShoppingItem> getItems() {
@@ -69,11 +66,31 @@ public class ShoppingList extends RealmObject {
         mSum = sum;
     }
 
+//    public boolean isDeleted() {
+//        return mIsDeleted;
+//    }
+
     public void setDeleted(boolean isDeleted) {
         mIsDeleted = isDeleted;
     }
 
-    public boolean isDeleted() {
-        return mIsDeleted;
+    public String getStringCreatedTime() {
+        return new SimpleDateFormat("dd MMM yyyy, kk:mm:ss", Locale.getDefault())
+                .format(new Date(mCreatedTime));
+    }
+
+    public String getStringShoppingDate() {
+        return new SimpleDateFormat("dd MMM yyyy, EEEE", Locale.getDefault())
+                .format(new Date(mShoppingTime));
+    }
+
+    public String getStringShoppintDateShort() {
+        return new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                .format(new Date(mShoppingTime));
+    }
+
+    public String getStringCreatedDay() {
+        return new SimpleDateFormat("EEEE kk:mm:ss", Locale.getDefault())
+                .format(new Date(mCreatedTime));
     }
 }

@@ -46,29 +46,37 @@ public class ShoppingItemView extends SwipeView {
         mPrice = (EditText) findViewById(R.id.item_price);
     }
 
-    public void setChecked(boolean isChecked) {
+    public boolean isItemChecked() {
+        return mIsChecked.isChecked();
+    }
+
+    public void setItemChecked(boolean isChecked) {
         mIsChecked.setChecked(isChecked);
     }
 
-    public void setName(String name) {
+    public String getItemName() {
+        return mName.getText().toString();
+    }
+
+    public void setItemName(String name) {
         mName.setText(name);
     }
 
-    public void setPrice(double price) {
+    public double getItemPrice() {
+        return PriceFormatter.priceToDouble(mPrice.getText().toString());
+    }
+
+    public void setItemPrice(double price) {
         mPrice.setText(PriceFormatter.formatPrice(String.valueOf(price)));
     }
 
-    public double getPrice() {
-        return PriceFormatter.priceToDouble(mPrice.getText().toString());
+    public ShoppingItem getShoppingItem() {
+        return mShoppingItem;
     }
 
     public void setShoppingItem(ShoppingItem shoppingItem) {
         mShoppingItem = shoppingItem;
         updateFieldsByItem();
-    }
-
-    public ShoppingItem getShoppingItem() {
-        return mShoppingItem;
     }
 
     public boolean updateShoppingItem() {
@@ -82,9 +90,9 @@ public class ShoppingItemView extends SwipeView {
     }
 
     private void updateFieldsByItem() {
-        setPrice(mShoppingItem.getPrice());
-        setName(mShoppingItem.getName());
-        setChecked(mShoppingItem.isChecked());
+        setItemPrice(mShoppingItem.getPrice());
+        setItemName(mShoppingItem.getName());
+        setItemChecked(mShoppingItem.isChecked());
     }
 
     public void setImeActionListener(TextView.OnEditorActionListener listener) {

@@ -8,6 +8,15 @@
 
     <string name="default_list_name">Shopping list</string>
     <string name="default_list_name_hint"><i>Shopping list</i></string>
+    <string name="default_shop_name">Shop</string>
+
+    <!--DIALOG INFORMATION-->
+    <string name="dialog_info_title">Information</string>
+    <string name="dialog_info_shop_name_hint">Shop name</string>
+    <string name="dialog_info_today_button">TODAY</string>
+    <string name="dialog_info_datepicker_title">Shopping date</string>
+    <string name="dialog_ok_button">OK</string>
+    <string name="dialog_cancel_button">CANCEL</string>
 
     <string name="empty_list">Nothing here yet</string>
 
@@ -16,7 +25,17 @@
     <string name="copy_icon">Copy icon</string>
     <string name="delete_snackbar_text">Deleted shopping list:\n%1$s</string>
     <string name="delete_snackbar_action">CANCEL</string>
-    <string name="delete_item_cnackbar_text">Deleted item:\n%1$s</string>
+    <string name="delete_item_snackbar_text">Deleted item:\n%1$s</string>
 
+    <!--MENU-->
     <string name="menu_add">Add new item</string>
+    <string name="menu_sort">Sort items</string>
+
+    <!--DIALOG SORTING-->
+    <string name="dialog_sort_title">Sort&#8230;</string>
+    <string name="dialog_sort_ascending">Ascending</string>
+    <string name="dialog_sort_descending">Descending</string>
+    <string name="dialog_sort_byChecking">By checking</string>
+    <string name="dialog_sort_byName">By name</string>
+    <string name="dialog_sort_byPrice">By price</string>
 </resources>

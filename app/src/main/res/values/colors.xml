@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#219846</color>
     <color name="colorAccent">#000000</color>
     <color name="textColorPrimary">#000000</color>
+    <color name="textColorWhite">#ffffff</color>
+    <color name="colorAccentSecondary">#ffffff</color>
 
     <color name="verticalDividerColor">#ED8098</color>
     <color name="horizontalDividerColor">#979BB8</color>

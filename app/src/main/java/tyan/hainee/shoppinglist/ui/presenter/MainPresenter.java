@@ -18,10 +18,13 @@ import tyan.hainee.shoppinglist.util.Constants;
 import tyan.hainee.shoppinglist.util.ItemClickSupport;
 
 public class MainPresenter {
+    private final String TAG = "MainPresenter";
+
     private MainActivity mActivity;
     private Realm mRealm;
     private MainListAdapter mAdapter;
     private int mDeletedListPosition = -1;
+    private ShoppingList mDeletedList;
 
     private ItemClickSupport.OnItemClickListener mOnItemClickListener = new ItemClickSupport.OnItemClickListener() {
         @Override
@@ -33,38 +36,43 @@ public class MainPresenter {
         @Override
         public void onSwiped(final int position) {
             mDeletedListPosition = position;
-
-            mRealm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    mAdapter.getList(position).setDeleted(true);
-                }
-            });
-            mAdapter.notifyItemRemoved(position);
+            mDeletedList = mAdapter.getList(position);
 
             String listName = mAdapter.getList(position).getName();
             listName = (listName.isEmpty() || listName.equals("")) ?
                     mActivity.getResources().getString(R.string.default_list_name) : listName;
 
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    mDeletedList.setDeleted(true);
+                }
+            });
+            mAdapter.notifyItemRemoved(position);
+
             String snackBarText = String.format(Locale.getDefault(),
                     mActivity.getResources().getString(R.string.delete_snackbar_text),
                     listName);
-
             mActivity.showSnackBar(snackBarText);
         }
     };
     private View.OnClickListener mOnRestoreListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (mDeletedListPosition < 0) return;
+            if (mDeletedListPosition < 0 || mDeletedList == null) return;
+
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    mAdapter.getList(mDeletedListPosition).setDeleted(false);
+                    mDeletedList.setDeleted(false);
                 }
             });
+
+            mActivity.checkIfEmpty();
             mAdapter.notifyItemInserted(mDeletedListPosition);
+
             mDeletedListPosition = -1;
+            mDeletedList = null;
         }
     };
     private View.OnClickListener mOnAddListListener = new View.OnClickListener() {

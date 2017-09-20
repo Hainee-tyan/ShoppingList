@@ -3,27 +3,26 @@ package tyan.hainee.shoppinglist.model;
 import java.util.Locale;
 
 import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.annotations.LinkingObjects;
 import io.realm.annotations.RealmClass;
 
 @RealmClass
 public class ShoppingItem extends RealmObject {
 
-    private boolean mChecked;
-    private String mName;
-    private double mPrice;
-
-    public ShoppingItem() {
-        this.mChecked = false;
-        this.mName = "";
-        this.mPrice = 0;
-    }
+    @LinkingObjects("mItems")
+    private final RealmResults<ShoppingList> mParent = null;
+    private boolean mChecked = false;
+    private String mName = "";
+    private double mPrice = 0d;
+    private boolean mBlackListed = false;
 
     public boolean isChecked() {
         return mChecked;
     }
 
     public void setChecked(boolean checked) {
-        this.mChecked = checked;
+        mChecked = checked;
     }
 
     public String getName() {
@@ -31,7 +30,7 @@ public class ShoppingItem extends RealmObject {
     }
 
     public void setName(String name) {
-        this.mName = name;
+        mName = name;
     }
 
     public double getPrice() {
@@ -39,7 +38,15 @@ public class ShoppingItem extends RealmObject {
     }
 
     public void setPrice(double price) {
-        this.mPrice = price;
+        mPrice = price;
+    }
+
+    public boolean isBlackListed() {
+        return mBlackListed;
+    }
+
+    public void setBlackListed(boolean black) {
+        mBlackListed = black;
     }
 
     public String toString() {

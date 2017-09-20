@@ -1,12 +1,12 @@
 package tyan.hainee.shoppinglist.ui.widget;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.widget.EditText;
 
-public class MultilineEditText extends EditText {
+public class MultilineEditText extends AppCompatEditText {
 
     public MultilineEditText(Context context) {
         super(context);

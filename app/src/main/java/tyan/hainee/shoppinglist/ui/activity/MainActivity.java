@@ -2,9 +2,11 @@ package tyan.hainee.shoppinglist.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
         mSnackBar = Snackbar
                 .make(mMainView, "", Snackbar.LENGTH_LONG)
                 .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        super.onDismissed(transientBottomBar, event);
+                    }
+                })
                 .setAction(R.string.delete_snackbar_action, mPresenter.getOnRestoreListener());
         findViewById(R.id.fab).setOnClickListener(mPresenter.getOnAddListListener());
     }
@@ -59,21 +67,24 @@ public class MainActivity extends AppCompatActivity {
         mListView.addItemDecoration(dividerItemDecoration);
         mListView.setAdapter(mPresenter.getAdapter());
 
-        ItemClickSupport.addTo(mListView).setOnItemClickListener(mPresenter.getOnItemClickListener());
-        (new ItemTouchHelper(new ItemSwipeCallback(this, mPresenter.getOnSwipeListener()))).attachToRecyclerView(mListView);
-
-        mListView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        mListView.setItemAnimator(new DefaultItemAnimator() {
             @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+            public void onAnimationFinished(RecyclerView.ViewHolder viewHolder) {
                 checkIfEmpty();
             }
         });
+
+        ItemClickSupport.addTo(mListView).setOnItemClickListener(mPresenter.getOnItemClickListener());
+        (new ItemTouchHelper(new ItemSwipeCallback(this, mPresenter.getOnSwipeListener()))).attachToRecyclerView(mListView);
+
+        checkIfEmpty();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == Constants.SHOPPING_LIST_REQUEST_CODE ) {
             mPresenter.getAdapter().notifyDataSetChanged();
+            checkIfEmpty();
         }
     }
 
@@ -90,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void checkIfEmpty() {
-        mListView.setVisibility(mPresenter.isEmpty() ? View.GONE : View.VISIBLE);
-        mEmptyView.setVisibility(mPresenter.isEmpty() ? View.VISIBLE : View.GONE);
+        boolean isEmpty = mPresenter.isEmpty();
+        mListView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
     }
 
     public void showSnackBar(String text) {

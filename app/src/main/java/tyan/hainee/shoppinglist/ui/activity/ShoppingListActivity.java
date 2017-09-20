@@ -1,39 +1,24 @@
 package tyan.hainee.shoppinglist.ui.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.Realm;
-import io.realm.RealmList;
 import tyan.hainee.shoppinglist.R;
-import tyan.hainee.shoppinglist.ShoppingListApplication;
-import tyan.hainee.shoppinglist.model.ShoppingItem;
-import tyan.hainee.shoppinglist.model.ShoppingList;
-import tyan.hainee.shoppinglist.ui.widget.CheckedItemListener;
-import tyan.hainee.shoppinglist.ui.widget.PriceWatcher;
-import tyan.hainee.shoppinglist.ui.widget.ShoppingItemView;
-import tyan.hainee.shoppinglist.ui.widget.SwipeView;
-import tyan.hainee.shoppinglist.util.Constants;
+import tyan.hainee.shoppinglist.ui.presenter.ShoppingListPresenter;
+import tyan.hainee.shoppinglist.ui.widget.ListInfoDialog;
+import tyan.hainee.shoppinglist.ui.widget.ListSortDialog;
 
 public class ShoppingListActivity extends AppCompatActivity {
     private final String TAG = "ShoppingListActivity";
@@ -48,24 +33,10 @@ public class ShoppingListActivity extends AppCompatActivity {
     @BindView(R.id.shopping_list_activity)
     View mMainView;
 
-    //Shopping list information
-    private ShoppingList mShoppingList;
-    private RealmList<ShoppingItem> mItems;
-    private long mCreatedTime;
-    private double mSum;
-
     //Utils
-    private Realm mRealm;
-    private DecimalFormat mDecimalFormat;
-    private Snackbar mSnackBar;
-
-    //Listeners and watchers
-    private AddViewActionListener mAddViewActionListener;
-    private PriceWatcher mPriceWatcher;
-    private CheckedItemListener mCheckedItemListener;
-    private PriceChangeWatcher mPriceChangeWatcher;
-    private OnDismissListener mOnDismissListener;
-    private ShoppingItemView mDeletedView;
+    private ListInfoDialog mDialogInfo;
+    private ListSortDialog mDialogSort;
+    private ShoppingListPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,78 +44,38 @@ public class ShoppingListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_shopping_list);
         ButterKnife.bind(this);
 
-        Intent intent = getIntent();
-        mCreatedTime = System.currentTimeMillis();
-        if (intent != null) {
-            mCreatedTime = intent.getLongExtra(Constants.SHOPPING_LIST_CREATED_TIME_EXTRA, mCreatedTime);
-        }
+        mPresenter = new ShoppingListPresenter(this);
+        mPresenter.init();
+        mPresenter.getAdapter().bind(mShoppingListView);
 
-        mRealm = ((ShoppingListApplication) getApplication()).getRealm();
-        mShoppingList = mRealm
-                .where(ShoppingList.class)
-                .equalTo(Constants.SHOPPING_LIST_CREATED_TIME_NAME, mCreatedTime)
-                .findFirst();
+        mNameView.setText(mPresenter.getName());
+        mSumView.setText(mPresenter.getSum());
 
-        if (mShoppingList == null) {
-            mRealm.executeTransaction(new Realm.Transaction() {
+        mDialogInfo = new ListInfoDialog(this);
+        mDialogInfo.setOnConfirmListener(mPresenter.getDialogInfoListener());
+
+        mDialogSort = new ListSortDialog(this);
+        mDialogSort.setOnConfirmListener(mPresenter.getDialogSortListener());
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        if (toolbar != null) {
+            toolbar.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void execute(Realm realm) {
-                    mShoppingList = realm.createObject(ShoppingList.class, System.currentTimeMillis());
+                public void onClick(View view) {
+                    mDialogInfo.show(mPresenter.getShopName(), mPresenter.getShoppingDate());
                 }
             });
+            setSupportActionBar(toolbar);
         }
-
-        initToolbar();
-
-        mDecimalFormat = new DecimalFormat();
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        mDecimalFormat.setGroupingUsed(false);
-        mDecimalFormat.setDecimalFormatSymbols(dfs);
-        mDecimalFormat.setMaximumFractionDigits(2);
-
-        mSnackBar = Snackbar
-                .make(mMainView, "", Snackbar.LENGTH_LONG)
-                .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .setAction(R.string.delete_snackbar_action, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (mDeletedView != null) {
-                            mDeletedView.restore();
-                            changeSum(mDeletedView.getPrice(), 0);
-                            mDeletedView = null;
-                        }
-                    }
-                });
-
-        String name = mShoppingList.getName().isEmpty() ? "" : mShoppingList.getName();
-        mNameView.setText(name);
-        mSum = mShoppingList.getSum();
-        mSumView.setText(mDecimalFormat.format(mSum));
-
-        mItems = mShoppingList.getItems();
-
-        mAddViewActionListener = new AddViewActionListener();
-        mCheckedItemListener = new CheckedItemListener();
-        mPriceWatcher = new PriceWatcher();
-        mPriceChangeWatcher = new PriceChangeWatcher();
-        mOnDismissListener = new OnDismissListener();
-
-        for (ShoppingItem item : mItems) {
-            drawShoppingItem(item, -1, false, false);
-        }
-
-        if (mItems.isEmpty()) {
-            addShoppingItem(0, false);
-        }
+        updateToolbar();
     }
 
-    private void initToolbar() {
+    public void updateToolbar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(mShoppingList.getStringCreatedDate());
-            actionBar.setSubtitle(mShoppingList.getStringCreatedDay());
+            actionBar.setTitle(mPresenter.getShopName());
+            actionBar.setSubtitle(mPresenter.getStringShoppingDate());
         }
     }
 
@@ -162,7 +93,7 @@ public class ShoppingListActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        updateShoppingList();
+        mPresenter.updateShoppingList();
         super.onPause();
     }
 
@@ -171,115 +102,6 @@ public class ShoppingListActivity extends AppCompatActivity {
         super.onRestart();
         if (getCurrentFocus() != null) {
             getCurrentFocus().clearFocus();
-        }
-    }
-
-    public void addShoppingItem(final int position, boolean animate) {
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                mItems.add(position, mRealm.createObject(ShoppingItem.class));
-            }
-        });
-        drawShoppingItem(mItems.get(position), position, true, animate);
-    }
-
-    private void drawShoppingItem(ShoppingItem item, int position, boolean showKeyboard, boolean animate) {
-        final ShoppingItemView view = new ShoppingItemView(this);
-        view.setImeActionListener(mAddViewActionListener);
-        view.setCheckedItemListener(mCheckedItemListener);
-        view.setPriceWatcher(mPriceWatcher);
-
-        view.setShoppingItem(item);
-
-        view.setPriceChangeWatcher(mPriceChangeWatcher);
-        view.setOnViewDismissListener(mOnDismissListener);
-        mShoppingListView.addView(view, position);
-
-        if (animate) {
-            view.animateAppearance();
-        }
-
-        if (showKeyboard) {
-            view.showKeyboard();
-        }
-    }
-
-
-    private void updateShoppingList() {
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                for (int i = 0; i < mShoppingListView.getChildCount(); i++) {
-                    ShoppingItemView itemView = (ShoppingItemView) mShoppingListView.getChildAt(i);
-                    if (itemView.getVisibility() == View.GONE) {
-                        mItems.remove(itemView.getShoppingItem());
-                    }
-                    else {
-                        itemView.updateShoppingItem();
-                    }
-                }
-                mShoppingList.setName(mNameView.getText().toString());
-                mShoppingList.setSum(mItems.sum("mPrice").doubleValue());
-            }
-        });
-    }
-
-    private void changeSum(double addend, double subtrahend) {
-        mSum = mSum - subtrahend + addend;
-        mSumView.setText(mDecimalFormat.format(mSum));
-    }
-
-    private class OnDismissListener implements SwipeView.OnViewDismissListener {
-        @Override
-        public void onDismiss(View view) {
-            changeSum(0, ((ShoppingItemView) view).getPrice());
-            mDeletedView = (ShoppingItemView) view;
-            mSnackBar.setText("1 item deleted").show();
-        }
-    }
-
-    private class PriceChangeWatcher implements TextWatcher {
-        private final String TAG = "PriceChangeWatcher";
-
-        private double previousAddend;
-
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            try {
-                previousAddend = Double.parseDouble(charSequence.toString());
-            }
-            catch (Exception e) {
-                previousAddend = 0;
-            }
-        }
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            double addend = 0;
-            try {
-                addend = Double.parseDouble(charSequence.toString());
-            }
-            catch (Exception e) {
-                addend = 0;
-            }
-            finally {
-                changeSum(addend, previousAddend);
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {}
-    }
-
-    private class AddViewActionListener implements TextView.OnEditorActionListener {
-        @Override
-        public boolean onEditorAction(TextView textView, int keyCode, KeyEvent keyEvent) {
-            if (keyCode == EditorInfo.IME_ACTION_NEXT) {
-                int position = mShoppingListView.indexOfChild(mShoppingListView.getFocusedChild());
-                addShoppingItem(position + 1, true);
-                return true;
-            }
-            return false;
         }
     }
 
@@ -293,13 +115,34 @@ public class ShoppingListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_item: {
-                addShoppingItem(mShoppingListView.getChildCount(), true);
+                mPresenter.addItem(0);
+                return true;
+            }
+            case R.id.action_sort: {
+                mDialogSort.show();
                 return true;
             }
             default : {
                 return super.onOptionsItemSelected(item);
             }
-
         }
+    }
+
+    public void changeSum(String sum) {
+        mSumView.setText(sum);
+    }
+
+    public String getNameViewText() {
+        return mNameView.getText().toString();
+    }
+
+    public void showDeleteSnackBar(String snackBarText, View.OnClickListener snackBarListener,
+                                   Snackbar.Callback callback) {
+        Snackbar
+                .make(mMainView, snackBarText, Snackbar.LENGTH_LONG)
+                .setActionTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setAction(R.string.delete_snackbar_action, snackBarListener)
+                .addCallback(callback)
+                .show();
     }
 }

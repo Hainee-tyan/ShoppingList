@@ -11,38 +11,55 @@
         android:id="@+id/shopping_list_delete_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@drawable/ic_delete"
-        android:contentDescription="@string/delete_icon"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:padding="@dimen/list_padding"/>
+        android:layout_alignParentRight="true"
+        android:contentDescription="@string/delete_icon"
+        android:padding="@dimen/list_padding"
+        android:src="@drawable/ic_delete"/>
     <LinearLayout
         android:id="@+id/shopping_list_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/listBackground">
-        <LinearLayout
+        android:background="@color/listBackground"
+        android:orientation="horizontal">
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="8"
+            android:orientation="vertical"
             android:padding="@dimen/list_padding">
+            <TextView
+                android:id="@+id/shopping_list_shop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingBottom="@dimen/list_name_padding_bottom"
+                android:text="@string/default_list_name"
+                android:textSize="@dimen/list_big_text_size" />
+            <TextView
+                android:id="@+id/shopping_list_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/shopping_list_shop"
+                android:textStyle="italic"/>
             <TextView
                 android:id="@+id/shopping_list_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/default_list_name"
-                android:textSize="@dimen/list_big_text_size"
-                android:maxLines="1"
+                android:layout_alignBaseline="@id/shopping_list_date"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/shopping_list_shop"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_toLeftOf="@id/shopping_list_date"
+                android:layout_toStartOf="@id/shopping_list_date"
                 android:ellipsize="end"
-                android:paddingBottom="@dimen/list_name_padding_bottom" />
-            <TextView
-                android:id="@+id/shopping_list_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="italic"/>
-        </LinearLayout>
+                android:maxLines="1"/>
+        </RelativeLayout>
         <View
             android:layout_width="@dimen/vertical_divider_width"
             android:layout_height="match_parent"
@@ -52,20 +69,20 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
+            android:gravity="center_vertical|end"
             android:paddingLeft="@dimen/list_padding"
             android:paddingStart="@dimen/list_padding"
-            android:gravity="center_vertical|end"
             android:textSize="@dimen/list_big_text_size" />
         <TextView
             android:id="@+id/shopping_list_currency"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="@string/currency"
-            android:paddingLeft="@dimen/list_padding"
-            android:paddingStart="@dimen/list_padding"
-            android:paddingRight="@dimen/list_padding"
-            android:paddingEnd="@dimen/list_padding"
             android:gravity="center"
+            android:paddingEnd="@dimen/list_padding"
+            android:paddingLeft="@dimen/list_padding"
+            android:paddingRight="@dimen/list_padding"
+            android:paddingStart="@dimen/list_padding"
+            android:text="@string/currency"
             android:textSize="@dimen/list_big_text_size" />
     </LinearLayout>
     <View

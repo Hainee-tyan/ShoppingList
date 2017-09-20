@@ -37,31 +37,6 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
         mDF.setDecimalFormatSymbols(dfs);
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-
-        @BindView(R.id.shopping_list_item)
-        View shoppingListItem;
-
-        @BindView(R.id.shopping_list_name)
-        TextView nameTextView;
-        @BindView(R.id.shopping_list_date)
-        TextView dateTextView;
-        @BindView(R.id.shopping_list_sum)
-        TextView sumTextView;
-
-        @BindView(R.id.shopping_list_delete_view)
-        View deleteView;
-        @BindView(R.id.shopping_list_delete_icon)
-        View deleteIcon;
-        @BindView(R.id.shopping_list_selectable_view)
-        View selectableView;
-
-        ViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-    }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = mInflater.inflate(R.layout.shopping_list_item, parent, false);
@@ -72,13 +47,16 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         ShoppingList shoppingList = getList(position);
         String listName = shoppingList.getName();
+        String shopName = shoppingList.getShopName();
 
         holder.shoppingListItem.setX(0f);
 
         holder.nameTextView.setText((listName.isEmpty() || listName.equals("")) ?
                 mContext.getResources().getString(R.string.default_list_name) : listName);
-        holder.dateTextView.setText(shoppingList.getStringCreatedTime());
+        holder.dateTextView.setText(shoppingList.getStringShoppintDateShort());
         holder.sumTextView.setText(mDF.format(shoppingList.getSum()));
+        holder.shopTextView.setText((shopName.isEmpty() || shopName.equals("")) ?
+                mContext.getResources().getString(R.string.default_shop_name) : shopName);
 
         holder.shoppingListItem.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int measuredHeight = holder.shoppingListItem.getMeasuredHeight();
@@ -97,6 +75,33 @@ public class MainListAdapter extends RecyclerView.Adapter<MainListAdapter.ViewHo
 
     public ShoppingList getList(int position) {
         return mList.get(position);
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.shopping_list_item)
+        View shoppingListItem;
+
+        @BindView(R.id.shopping_list_name)
+        TextView nameTextView;
+        @BindView(R.id.shopping_list_date)
+        TextView dateTextView;
+        @BindView(R.id.shopping_list_sum)
+        TextView sumTextView;
+        @BindView(R.id.shopping_list_shop)
+        TextView shopTextView;
+
+        @BindView(R.id.shopping_list_delete_view)
+        View deleteView;
+        @BindView(R.id.shopping_list_delete_icon)
+        View deleteIcon;
+        @BindView(R.id.shopping_list_selectable_view)
+        View selectableView;
+
+        ViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
     }
 }
 
